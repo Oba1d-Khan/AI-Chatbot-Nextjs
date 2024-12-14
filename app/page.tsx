@@ -28,6 +28,17 @@ export default function Chat() {
   const [showChatIcon, setShowChatIcon] = useState(false);
   const chatIconRef = useRef<HTMLButtonElement>(null);
 
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    stop,
+    reload,
+    isLoading,
+    error,
+  } = useChat({ api: "/api/gemini" });
+
   useEffect(() => {
     console.log("useEffect triggered");
     const handleScroll = () => {
@@ -83,7 +94,7 @@ export default function Chat() {
             animate={{ opacity: 1, y: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-20 right-6 z-50 w-[95%] md:w-[500px]"
+            className="fixed bottom-8 right-6 z-50 w-[95%] md:w-[500px]"
           >
             <Card className="border-2">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -102,11 +113,66 @@ export default function Chat() {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
-                  <div className="w-full  mt-32 flex items-center justify-center gap-3 text-gray-500">
-                    No Messages Yet.
-                  </div>
+                  {messages?.length === 0 && (
+                    <div className="w-full  mt-32 flex items-center justify-center gap-3 text-gray-500">
+                      No Messages Yet.
+                    </div>
+                  )}
+                  {messages?.map((message, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col items-start space-y-2 px-4 py-3 text-sm"
+                    >
+                      Hi
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="w-full flex items-center justify-center gap-3 ">
+                      <Loader2 className="animate-spin h-5 w-5 text-primary" />
+                      <button
+                        className="underline"
+                        type="button"
+                        onClick={() => stop()}
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="w-full flex items-center justify-center gap-3 text-red-500">
+                      <div>An error occurred</div>
+                      <button
+                        className="underline"
+                        type="button"
+                        onClick={() => reload()}
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
                 </ScrollArea>
               </CardContent>
+              <CardFooter>
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex w-full justify-center space-x-2"
+                >
+                  <Input
+                    value={input}
+                    onChange={handleInputChange}
+                    className="flex-1"
+                    placeholder="Ask your question here..."
+                  />
+                  <Button
+                    type="submit"
+                    className="size-9"
+                    disabled={isLoading}
+                    size="icon"
+                  >
+                    <Send className="size-4" />
+                  </Button>
+                </form>
+              </CardFooter>
             </Card>
           </motion.div>
         )}
